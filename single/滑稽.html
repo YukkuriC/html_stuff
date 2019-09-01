@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <title>滑稽</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+    </style>
+    <script>
+        N = 10
+        R0 = 200
+        R1 = 0
+        DX = 0.3
+        DR = 0.02
+        pi2 = Math.PI * 2
+        function init(e) {
+            body = document.getElementsByTagName('body')[0]
+            body.style.margin = 0
+            tmp = body.getBoundingClientRect()
+            ww = tmp.width
+            wh = tmp.height
+
+            //initialize canvas
+            cv = document.createElement('canvas');
+            cv.style.position = 'absolute';
+            cv.style.padding = '0';
+            cv.style.top = cv.style.left = 0;
+            cv.width = ww;
+            cv.height = wh;
+            cv.style['background-color'] = 'black';
+            cv.pen = cv.getContext("2d");
+            cv.pen.fillStyle = "black";
+            body.appendChild(cv);
+
+            //generate huaji
+            theta = 0
+            r = rt = R1
+            x0 = ww / 2
+            y0 = wh / 2
+            // huas = []
+            for (i = 0; i < N; i++) {
+                // hua = document.createElement('img')
+                // hua.src = 'http://tb2.bdstatic.com/tb/editor/images/face/i_f25.png'
+                // hua.style.position = 'absolute'
+                // huas.push(hua)
+                eval(`x${i + 1}=${Math.random() * ww};y${i + 1}=${Math.random() * wh}`)
+            }
+            // for (i = N - 1; i >= 0; i--)body.appendChild(huas[i])
+            hua = new Image()
+            hua.src = 'http://tb2.bdstatic.com/tb/editor/images/face/i_f25.png'
+
+            //begin update
+            setTimeout(update, 1000 / 60)
+        }
+
+        function update() {
+            theta += DR
+            r += (rt - r) * 0.01
+            rt += (R0 - rt) * 0.1
+            if (theta > pi2) theta -= pi2
+
+            // huaji follow
+            cv.width=cv.width
+            for (i = 0; i < N; i++) {
+                eval(`x${i + 1}+=(x${i}-x${i + 1})*${DX};y${i + 1}+=(y${i}-y${i + 1})*${DX}`)
+                // hua = huas[i]
+                x = eval(`x${i + 1}`) - hua.width / 2 + Math.cos(theta + pi2 * i / N) * r
+                y = eval(`y${i + 1}`) - hua.height / 2 + Math.sin(theta + pi2 * i / N) * r
+                // hua.style.left = x
+                // hua.style.top = y
+                cv.pen.drawImage(hua, x, y);
+            }
+
+            //next update
+            setTimeout(update, 1000 / 60)
+        }
+
+        function update_pos(e) {
+            x0 = e.clientX
+            y0 = e.clientY
+            rt = R1
+        }
+
+    </script>
+</head>
+
+<body onload="init(event)" onmousemove="update_pos(event)">
+</body>
+
+</html>
