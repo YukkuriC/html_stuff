@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+    <meta http-equiv="expires" content="0">
+    <style>
+        #main {
+            display: -webkit-flex;
+            display: flex;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1><a href="https://thiscatdoesnotexist.com/">猫！</a></h1>
+    <div id='main'></div>
+    <script>
+        var count=0
+        var main = document.getElementById('main')
+        function grab() {
+            var img = document.createElement('img')
+            img.src = `https://thiscatdoesnotexist.com/?tmp=${count++}`
+            img.addEventListener('load', () => {
+                setTimeout(() => {
+                    grab()
+                }, 1000);
+            })
+            main.appendChild(img)
+        }
+        grab()
+    </script>
+</body>
+
+</html>
