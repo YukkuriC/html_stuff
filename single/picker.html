@@ -1,0 +1,81 @@
+<html>
+
+<head>
+    <style>
+        * {
+            padding: 0
+        }
+
+        body {
+            margin: 0
+        }
+
+        .header {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            z-index: 0;
+        }
+
+        #cv {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            z-index: -100;
+        }
+    </style>
+</head>
+
+<body style='background-color: black'>
+    <div class='header'>
+        <h1 id='display'>轮流点击屏幕开始抽奖</h1>
+    </div>
+    <canvas id='cv'></canvas>
+    <script>
+        // 记录选点
+        var points = []
+        document.body.addEventListener('click', e => {
+            points.push([e.clientX, e.clientY])
+            redraw()
+
+            // calc result
+            tmp = 0
+            points.forEach(pt => {
+                tmp += pt[0] - pt[1]
+            })
+            tmp = ((tmp % points.length) + points.length) % points.length
+            result.innerHTML = `总人数: ${points.length}\n中奖: 第${tmp + 1}人`
+        })
+
+
+        // 绘制结果
+        var canvas = document.getElementById('cv')
+        var pen = canvas.getContext('2d')
+        var pt_img = new Image()
+        pt_img.src = 'http://tb2.bdstatic.com/tb/editor/images/face/i_f25.png'
+        var result = document.getElementById('display')
+        function redraw() {
+            // resize
+            var tmp = document.body.getBoundingClientRect()
+            canvas.width = tmp.width
+            canvas.height = tmp.height
+
+            // draw
+            var R = G = B = 0
+            points.forEach(pt => {
+                R += pt[0]
+                G += pt[1]
+                B += 47
+                // draw points
+                pen.drawImage(pt_img, pt[0] - pt_img.width / 2, pt[1] - pt_img.height / 2)
+            })
+            // draw bg
+            R %= 64; G %= 64; B %= 64
+            color = `rgb(${R + 192},${G + 192},${B + 192})`
+            canvas.style.backgroundColor = color
+        }
+        redraw()
+    </script>
+</body>
+
+</html>
