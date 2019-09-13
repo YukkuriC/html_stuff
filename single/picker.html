@@ -41,7 +41,7 @@
             // calc result
             tmp = 0
             points.forEach(pt => {
-                tmp += pt[0] - pt[1]
+                tmp += pt[0] * 2 + pt[1]
             })
             tmp = ((tmp % points.length) + points.length) % points.length
             result.innerHTML = `总人数: ${points.length}\n中奖: 第${tmp + 1}人`
