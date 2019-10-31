@@ -13,6 +13,7 @@
         DX=15
         MD=300
         MS=50
+
         function init(e) {
             body = document.getElementsByTagName('body')[0]
             body.style.margin = 0
@@ -31,8 +32,15 @@
             pen.fillStyle = "Red";
             body.appendChild(cv);
 
-            hua = new Image()
-            hua.src = 'http://tb2.bdstatic.com/tb/editor/images/face/i_f25.png'
+            // check halloween
+            HUA_TEXT='花'
+            var d=new Date()
+            console.log(d)
+            if(d.getMonth()==9 && d.getDate()==31){
+                HUA_TEXT='🎃'
+                cv.style.background='gray'
+                document.title='万圣节快乐'
+            }
 
             update(e)
         }
@@ -51,11 +59,10 @@
                 for(x=dx;x<ww;x+=GX){
                     d=Math.sqrt(Math.pow(x-x0,2)+Math.pow(y-y0,2))
                     if(d<MD){
-                        // pen.drawImage(hua, x- hua.width / 2, y- hua.height / 2);
                         size=Math.floor(MS*(1-Math.pow(d/MD,2)))
                         pen.font=`bold ${size}px 微软雅黑`
                         pen.fillStyle = "#ff66cc";
-                        pen.fillText("花",x-size/2,y+size/2);
+                        pen.fillText(HUA_TEXT,x-size/2,y+size/2);
                     }
                 }
                 dx=(dx+DX)%GX
