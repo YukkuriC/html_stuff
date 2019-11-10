@@ -1,5 +1,9 @@
 <html>
 
+<head>
+    <title>Bull's Eye</title>
+</head>
+
 <body>
     <style>
         canvas {
@@ -133,6 +137,11 @@
             window.addEventListener('mousemove', e => {
                 MOUSEX = e.clientX
                 MOUSEY = e.clientY
+            })
+            window.addEventListener('touchmove', e => {
+                var tmp = e.targetTouches[0]
+                MOUSEX = tmp.pageX
+                MOUSEY = tmp.pageY
             })
             window.addEventListener('mousedown', e => {
                 particles.forEach(x => x.randtype())
