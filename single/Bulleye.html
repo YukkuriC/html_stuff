@@ -1,0 +1,156 @@
+<html>
+
+<body>
+    <style>
+        canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+    <canvas id='cv'></canvas>
+    <script>
+        // canvas
+        var canvas = document.getElementById('cv')
+        var pen = canvas.getContext('2d')
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+
+        // config
+        {
+            DIST_TRANS = {
+                50: 100,
+                100: 200,
+                200: 500,
+                500: 50,
+            }
+            R = 2
+            NPARTICLE = 5000
+            BGCLR = 'rgba(30,30,30,0.5)'
+            CLRS = [
+                'rgb(255,50,150)',
+                'rgb(50,95,255)'
+            ]
+            NREPLACE = 5
+        }
+
+        // var
+        {
+            DIST = 50
+            MOUSEX = MOUSEY = 0
+            T = new Date()
+            REP_COUNT = 0
+        }
+
+        // particle
+        {
+            class Particle {
+                randgen() {
+                    this.x = Math.random() * window.innerWidth
+                    this.y = Math.random() * window.innerHeight
+                    this.randtype()
+                }
+
+                randtype() {
+                    this.type = (Math.random() > 0.5) * 1
+                    this.f = Math.random() * 0.4 + 0.01
+                }
+
+                constructor() {
+                    this.randgen()
+                }
+
+                update(dt) {
+                    // replace
+                    REP_COUNT += dt / NPARTICLE
+                    if (REP_COUNT >= NREPLACE) {
+                        REP_COUNT -= NREPLACE
+                        return this.randgen()
+                    }
+
+                    // goto nearest ring
+                    var outx = this.x - MOUSEX + (Math.random() - 0.5) * 0.01,
+                        outy = this.y - MOUSEY + (Math.random() - 0.5) * 0.01,
+                        dist = Math.sqrt(outx * outx + outy * outy)
+                    if (dist == 0) return
+                    outx /= dist; outy /= dist
+                    var dd = (dist + this.type * DIST) % (DIST * 2) - DIST,
+                        td = dist - dd
+                    var dx = this.f * dt
+                    if (dx >= Math.abs(dd)) {
+                        this.x = MOUSEX + outx * td
+                        this.y = MOUSEY + outy * td
+                    } else if (dd != 0) {
+                        if (dd < 0) dx *= -1
+                        this.x -= dx * outx
+                        this.y -= dx * outy
+                    }
+
+                    // boundary
+                    if (this.x < 0 || this.x > window.innerWidth || this.y < 0 || this.y > window.innerHeight) {
+                        return this.randgen()
+                    }
+                }
+            }
+
+            particles = []
+            for (var i = 0; i < NPARTICLE; i++)particles.push(new Particle())
+        }
+
+        // events
+        {
+            function update() {
+                // clear
+                pen.fillStyle = BGCLR
+                pen.rect(0, 0, canvas.width, canvas.height)
+                pen.fill()
+
+                // draw
+                pen.globalCompositeOperation = "lighter"
+                particles.forEach(p => {
+                    pen.fillStyle = CLRS[p.type]
+                    pen.beginPath();
+                    pen.arc(p.x, p.y, R, 0, Math.PI * 2, true);
+                    pen.closePath();
+                    pen.fill();
+                })
+                pen.globalCompositeOperation = "source-over"
+
+                //update
+                var t1 = new Date()
+                var dt = t1 - T
+                particles.forEach(p => p.update(dt))
+
+                T = t1
+                requestAnimationFrame(update)
+            }
+            update()
+
+            window.addEventListener('resize', e => {
+                canvas.width = window.innerWidth
+                canvas.height = window.innerHeight
+            })
+            window.addEventListener('mousemove', e => {
+                MOUSEX = e.clientX
+                MOUSEY = e.clientY
+            })
+            window.addEventListener('mousedown', e => {
+                particles.forEach(x => x.randtype())
+                DIST = DIST_TRANS[DIST] || 50
+            })
+            window.addEventListener('keypress', e => {
+                console.log(e)
+                switch (e.key) {
+                    case ' ':
+                        DIST = DIST_TRANS[DIST] || 50
+                        break
+                    case 'Enter':
+                        particles.forEach(x => x.randtype())
+                        break
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>
