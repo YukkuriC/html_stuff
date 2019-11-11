@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Bull's Eye</title>
+    <title>Bull's Eye 2.0</title>
 </head>
 
 <body>
@@ -23,19 +23,22 @@
         // config
         {
             DIST_TRANS = {
-                50: 100,
-                100: 200,
-                200: 500,
-                500: 50,
+                50: 120,
+                120: 250,
+                250: 600,
+                600: 50,
             }
             R = 2
             NPARTICLE = 5000
             BGCLR = 'rgba(30,30,30,0.5)'
             CLRS = [
-                'rgb(255,50,150)',
-                'rgb(50,95,255)'
+                'rgb(150,20,20)',
+                'rgb(30,150,20)'
             ]
-            NREPLACE = 5
+            NREPLACE = 0.01
+            VMIN = 5
+            VMAX = 300
+            V2M = 60
         }
 
         // var
@@ -57,7 +60,8 @@
 
                 randtype() {
                     this.type = (Math.random() > 0.5) * 1
-                    this.f = Math.random() * 0.4 + 0.01
+                    this.f = Math.random() * (VMAX - VMIN) + VMIN
+                    this.f2 = (Math.random() * 2 - 1) * V2M
                 }
 
                 constructor() {
@@ -89,6 +93,11 @@
                         this.x -= dx * outx
                         this.y -= dx * outy
                     }
+
+                    // rotate
+                    dx = this.f2 * dt
+                    this.x += outy * dx
+                    this.y -= outx * dx
 
                     // boundary
                     if (this.x < 0 || this.x > window.innerWidth || this.y < 0 || this.y > window.innerHeight) {
@@ -123,7 +132,7 @@
                 //update
                 var t1 = new Date()
                 var dt = t1 - T
-                particles.forEach(p => p.update(dt))
+                particles.forEach(p => p.update(dt / 1000))
 
                 T = t1
                 requestAnimationFrame(update)
