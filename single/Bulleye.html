@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Bull's Eye 2.0</title>
+    <title>Bull's Eye 3.0</title>
 </head>
 
 <body>
@@ -28,16 +28,16 @@
                 250: 600,
                 600: 50,
             }
-            R = 2
+            R = 1.5
             NPARTICLE = 5000
             BGCLR = 'rgba(30,30,30,0.5)'
             CLRS = [
-                'rgb(150,20,20)',
-                'rgb(30,150,20)'
+                'rgb(150,150,20)',
+                'rgb(60,30,120)'
             ]
             NREPLACE = 0.01
-            VMIN = 5
-            VMAX = 300
+            VMIN = 20
+            VMAX = 500
             V2M = 60
         }
 
@@ -82,17 +82,10 @@
                         dist = Math.sqrt(outx * outx + outy * outy)
                     if (dist == 0) return
                     outx /= dist; outy /= dist
-                    var dd = (dist + this.type * DIST) % (DIST * 2) - DIST,
-                        td = dist - dd
-                    var dx = this.f * dt
-                    if (dx >= Math.abs(dd)) {
-                        this.x = MOUSEX + outx * td
-                        this.y = MOUSEY + outy * td
-                    } else if (dd != 0) {
-                        if (dd < 0) dx *= -1
-                        this.x -= dx * outx
-                        this.y -= dx * outy
-                    }
+                    
+                    var dx=this.f*Math.sin((dist/DIST+this.type)*Math.PI)*dt
+                    this.x += dx * outx
+                    this.y += dx * outy
 
                     // rotate
                     dx = this.f2 * dt
