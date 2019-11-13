@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Silk 1.1</title>
+    <title>Silk 2.0</title>
 </head>
 
 <body>
@@ -32,7 +32,8 @@
             VYMIN = 0.05
             VYMAX = 0.5
             CLR_RANGE = 25
-            ALPHA_RANGE = 0.025
+            ALPHA_RANGE = 0.015
+            LINE_WIDTH = 1.4
             ALPHA_BORDER = 0.7
         }
 
@@ -78,8 +79,11 @@
                             tdst = this.r + p.r
                         if (dst > tdst) continue
                         var alpha = this.A + p.A
+                        pen.lineWidth = LINE_WIDTH
                         if (dst > tdst * ALPHA_BORDER) {
-                            alpha *= (tdst - dst) / tdst / (1 - ALPHA_BORDER)
+                            var tmp = (tdst - dst) / tdst / (1 - ALPHA_BORDER)
+                            alpha *= tmp
+                            pen.lineWidth *= tmp
                         }
                         pen.strokeStyle = `rgba(${[].map.call('RGB', x => this[x] + p[x]).join(',')},${alpha})`
                         pen.beginPath()
