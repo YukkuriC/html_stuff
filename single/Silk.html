@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Silk 2.0</title>
+    <title>Silk 2.1</title>
 </head>
 
 <body>
@@ -28,12 +28,13 @@
             NPARTICLE = 60
             RMIN = 80
             RMAX = 150
-            VX = 0.3
+            YRANGE = 0.2
+            VX = 0.6
             VYMIN = 0.05
             VYMAX = 0.5
             CLR_RANGE = 25
             ALPHA_RANGE = 0.015
-            LINE_WIDTH = 1.4
+            LINE_WIDTH = 1.2
             ALPHA_BORDER = 0.7
         }
 
@@ -42,7 +43,7 @@
             class Particle {
                 constructor(x) {
                     this.x = x
-                    this.y = window.innerHeight / 2
+                    this.y = window.innerHeight * (0.5 + YRANGE * (Math.random() * 2 - 1))
                     this.vx = randrange(-VX, VX)
                     this.vy = randrange(VYMAX, VYMIN)
                     if (Math.random() >= 0.5) this.vy *= -1
