@@ -6,6 +6,7 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.0.0-beta3/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.0/echarts.min.js"></script>
     <script>
+        // 计算部分
         var CACHE = {}
         function CalcTimes(san, dsuccess, dfail) {
             if (san < 1) return 0
@@ -34,6 +35,53 @@
             var res = san * (1 + dsuccess)
             res += (100 - san) * (1 + dfail)
             return res / 200
+        }
+        // 模拟
+        function _Add(pool, key, val) {
+            pool[key] = (pool[key] || 0) + val
+        }
+        function Dice(d) {
+            return Math.floor(Math.random() * d) + 1
+        }
+        function SanCheck(san, dsuccess, dfail) {
+            var check = Dice(100)
+            return Dice((check <= san) ? dsuccess : dfail)
+        }
+        function SimuSC2End(san, dsuccess, dfail) {
+            if (!(san >= 1)) return 0
+            var dmg = SanCheck(san, dsuccess, dfail)
+            var res = SimuSC2End(san - dmg, dsuccess, dfail) + 1
+            _Add(VCOUNT, san, 1)
+            _Add(VSCDMG, san, dmg)
+            _Add(VSCTIMES, san, res)
+            return res
+        }
+        // 模拟接口
+        function ResetSimu() {
+            VCOUNT = {}
+            VSCTIMES = {}
+            VSCDMG = {}
+            VTOTAL = 0
+            VSANTOTAL = 0
+        }
+        ResetSimu()
+        function ChooseSimu() {
+            var msan = 100, minv = Infinity
+            for (var [san, cnt] of Object.entries(VCOUNT)) {
+                if (cnt < minv || (cnt == minv && san > msan)) {
+                    msan = san
+                    minv = cnt
+                }
+            }
+            SimuSC2End(msan, DSUCCESS, DFAIL)
+            VSANTOTAL += msan - 0
+            VTOTAL++
+            requestAnimationFrame(ChooseSimu)
+        }
+        // 可视化
+        function ShowDice(d) {
+            if (d == 1) return d + ''
+            return `1D${d}`
         }
     </script>
     <style>
@@ -81,13 +129,17 @@
             height: `${window.innerHeight - chartDom.offsetTop}px`,
         })
         var myChart = echarts.init(chartDom);
-        var options = option = {
+        var options = {
+            backgroundColor: 'white',
             title: { text: '' },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: {
                     label: {
-                        formatter: params => `San值: ${params.value}`,
+                        formatter: params => {
+                            var res = `San值: ${params.value}`
+                            return res
+                        },
                     }
                 },
             },
@@ -110,23 +162,43 @@
                 }
             ],
             series: [{
-                name: '所需平均次数',
-                data: [],
+                name: '理论平均次数',
                 type: 'line',
                 color: '#c2f',
                 emphasis: { focus: 'series' },
             },
             {
-                name: '单次平均伤害',
-                data: [],
+                name: '理论平均伤害',
                 type: 'line',
                 color: '#fa2',
                 yAxisIndex: 1,
+                emphasis: { focus: 'series' },
+            },
+            {
+                name: '实际平均次数',
+                type: 'scatter',
+                color: 'red',
+                symbolSize: 5,
+                emphasis: { focus: 'series' },
+            },
+            {
+                name: '实际平均伤害',
+                type: 'scatter',
+                color: 'blue',
+                yAxisIndex: 1,
+                symbolSize: 5,
                 emphasis: { focus: 'series' },
             }]
         };
         for (var i = 100; i >= 1; i--)
             options.xAxis.data.push(i)
+        Object.defineProperty(options.title, 'text', {
+            get: () => {
+                var res = `San Check ${ShowDice(DSUCCESS)}/${ShowDice(DFAIL)}`
+                if (VTOTAL > 0) res += ` (已使用${VTOTAL}个志愿者, 平均SAN: ${Math.round(VSANTOTAL * 10 / VTOTAL) / 10})`
+                return res
+            }
+        })
 
         function GenButton(type, size) {
             var btn = document.createElement('button')
@@ -148,7 +220,9 @@
                 btn.classList.remove('active')
                 if (window[btn.target] == btn.size) btn.classList.add('active')
             })
-            options.title.text = `San Check 1D${DSUCCESS}/1D${DFAIL}`
+
+            // 初始化数据
+            ResetSimu()
 
             // 计算san
             options.series.forEach(s => s.data = [])
@@ -156,10 +230,22 @@
                 options.series[0].data.push(CalcTimes(i, DSUCCESS, DFAIL))
                 options.series[1].data.push(CalcMeanDmg(i, DSUCCESS, DFAIL))
             }
-
-            // 更新eCharts
-            myChart.setOption(option)
+            PickSimuData()
         }
+
+        function PickSimuData() {
+            options.series[2].data = []
+            options.series[3].data = []
+            for (var i = 100; i >= 1; i--) {
+                options.series[2].data.push(VSCTIMES[i] / VCOUNT[i])
+                options.series[3].data.push(VSCDMG[i] / VCOUNT[i])
+            }
+            myChart.setOption(options)
+        }
+
+        // 自动模拟
+        setInterval(PickSimuData, 500);
+        ChooseSimu()
     </script>
 </body>
 
